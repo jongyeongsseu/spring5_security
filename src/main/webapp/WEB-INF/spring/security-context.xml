@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans
+	xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<!--  
+	1. 누군가가 로그인 페이지를 응답해주고 있다.
+	2. 누군가가 /login uri를 처리해주고 있다.
+	3. 내가 Controller 단에서 처리하지 않았음에도 불구하고 /login 페이지에 접속된 것을 보면: 누군가가 Interceptor 하고 있다. 
+	→ Spring Security
+	-->
+	
+	<http>
+		<intercept-url pattern="/security/all" access="permitAll" />
+		<intercept-url pattern="/security/member" access="hasRole('ROLE_MEMBER')" />
+		<intercept-url pattern="/security/admin" access="hasRole('ROLE_ADMIN')" />
+		
+		<!-- 로그인 페이지 커스타마이징 -->
+		<form-login login-page="/login/loginForm"
+                    default-target-url="/"
+                    authentication-failure-url="/login/loginForm?error"
+                    username-parameter="id"
+                    password-parameter="password" />
+        
+        <logout logout-url="/logout" logout-success-url="/" /> 
+		
+		<!-- 403 에러 처리 -->
+		<access-denied-handler error-page="/security/accessError"/>
+		
+	</http>
+
+	<!-- provider -->
+	   <authentication-manager>
+      <authentication-provider> 
+         <user-service> 
+            <user name="member" password="{noop}member" authorities="ROLE_MEMBER" />
+            <!-- <user name="manager" password="{noop}manager" authorities="ROLE_MEMBER" /> -->
+            <user name="admin" password="{noop}admin" authorities="ROLE_MEMBER, ROLE_ADMIN" />  
+         </user-service> 
+      </authentication-provider>
+   </authentication-manager>
+
+</beans:beans>
